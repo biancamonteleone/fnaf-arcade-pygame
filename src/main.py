@@ -5,7 +5,7 @@ from player import *
 from enemys import *
 from weapon import *
 from data import *
-from functions import reiniciar
+from functions import *
 #---------------------------------------------------------------------------------------------------------------------------
 pygame.init()
 #---------------------------------------------------------------------------------------------------------------------------
@@ -116,13 +116,12 @@ flag_linterna = False
 flag_linterna_disponible = True
 #---------------------------------------------------------------------------------------------------------------------------
 while is_running:
-    clock.tick(FPS) # limita al while en cada iteracion 
+    clock.tick(FPS)
 
     if mostrar_game: 
-        for event in pygame.event.get(): #retorna lista de eventos (que ocurrieron desde la ultima vez que llame a 'get')
-            if event.type == pygame.QUIT: #QUIT = 256(cruz)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 is_running = False
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     mover_izquierda = True
@@ -132,7 +131,6 @@ while is_running:
                     mover_arriba = True
                 if event.key == pygame.K_s:
                     mover_abajo = True
-
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     mover_izquierda = False
@@ -142,7 +140,7 @@ while is_running:
                     mover_arriba = False
                 if event.key == pygame.K_s:
                     mover_abajo = False
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Right-click
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 create_bullet(jugador, event.pos)
                 sonido_disparo.play()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
@@ -260,11 +258,11 @@ while is_running:
         mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_primeros_enemigos, flag_niños = reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos)
         pygame.mixer.music.play(-1)
         title_screen(title_images[indice_imagen_actual])
-        for event in pygame.event.get(): #procesa todos los eventos desde la ultima iteracion
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if play_button.collidepoint(event.pos): #si el clic ocurre dentro de boton jugar
+                if play_button.collidepoint(event.pos):
                     sonido_boton.play()
                     mostrar_title_screen = False 
                     indice_imagen_actual = 0
@@ -274,7 +272,7 @@ while is_running:
                     mostrar_title_screen = False
                     indice_imagen_actual = 0
                     mostrar_instructions_screen = True
-                if exit_button_0.collidepoint(event.pos): #si el clic ocurre dentro de boton salir
+                if exit_button_0.collidepoint(event.pos):
                     is_running = False
             if event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(title_images)
@@ -291,12 +289,12 @@ while is_running:
                     indice_imagen_actual = 0
                     mostrar_title_screen = True
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 3:  # Clic derecho
+                if event.button == 3:
                     sonido_boton.play()
                     indice_imagen_actual += 1
                     if indice_imagen_actual >= len(instructions_images):
                         indice_imagen_actual = 0
-                if event.button == 1:  # Clic izquierdo
+                if event.button == 1:
                     sonido_boton.play()
                     indice_imagen_actual -= 1
                     if indice_imagen_actual < 0:
@@ -340,7 +338,6 @@ while is_running:
     #---------------------------------------------------------------------------------------------------------------------------
     elif mostrar_game_over_screen:
         game_over_screen(game_over_images[indice_imagen_actual])
-        # pygame.mixer.music.pause()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False

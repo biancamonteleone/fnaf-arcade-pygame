@@ -1,5 +1,7 @@
 import pygame
 from settings import WIDTH_PERSONAJE, HEIGHT_PERSONAJE
+from data import *
+from settings import *
 
 def get_path_actual(nombre_archivo:str) -> str:
     """
@@ -59,5 +61,6 @@ def reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador
     for enemigo in enemigos:
         enemigos.remove(enemigo)
     return mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_enemigos, flag_niños
+
 
     
