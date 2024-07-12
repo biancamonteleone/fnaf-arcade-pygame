@@ -6,27 +6,23 @@ from weapon import *
 from data import *
 from functions import *
 #---------------------------------------------------------------------------------------------------------------------------
-# Inicialización de Pygame y la pantalla
 pygame.init()
-SCREEN = pygame.display.set_mode(SCREEN_SIZE) #establecer tamaño de la pantalla
-pygame.display.set_caption("Escape from Freddy's") #nombrar al juego
-pygame.display.set_icon(icon) #mostrar icono
-clock = pygame.time.Clock() #reloj
-#---------------------------------------------------------------------------------------------------------------------------
-#personajes
+SCREEN = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption("Escape from Freddy's")
+pygame.display.set_icon(icon)
+clock = pygame.time.Clock()
+
+cambiar_imagen_evento = pygame.USEREVENT + 1
+pygame.time.set_timer(cambiar_imagen_evento, 100)
+cambiar_imagen_jumpscare = pygame.USEREVENT + 2
+pygame.time.set_timer(cambiar_imagen_jumpscare, 35)
+
 jugador = crear_jugador(jugador_img)
 enemigos = []
 #---------------------------------------------------------------------------------------------------------------------------
-#eventos de usuario
-cambiar_imagen_evento = pygame.USEREVENT + 1
-pygame.time.set_timer(cambiar_imagen_evento, 100) #(tipo de evento, cada cuando se genera el evento)
-cambiar_imagen_jumpscare = pygame.USEREVENT + 2
-pygame.time.set_timer(cambiar_imagen_jumpscare, 35) #(tipo de evento, cada cuando se genera el evento)
-#---------------------------------------------------------------------------------------------------------------------------
-#pantallas
 def title_screen(imagen):
     SCREEN.blit(imagen, [0,0])
-    SCREEN.blit(tittle_text_1, (80, 40)) #botom.x botom.y
+    SCREEN.blit(tittle_text_1, (80, 40))
     SCREEN.blit(tittle_text_2, (80, 110))
     SCREEN.blit(tittle_text_3, (80, 180))
     pygame.draw.rect(SCREEN, (NEGRO), play_button)
@@ -55,19 +51,28 @@ def difficulty_screen(imagen):
     SCREEN.blit(hard_text, (80,480))
     pygame.display.update()
 
+def pantalla_pause():
+    pygame.draw.rect(SCREEN, (BLANCO), pause_botton)
+    pygame.draw.rect(SCREEN, (NEGRO), back_menu_button_3)
+    pygame.draw.rect(SCREEN, (NEGRO), exit_button_3)
+    SCREEN.blit(pause_text, (300, 150))
+    SCREEN.blit(back_menu_text_3, (250, 300))
+    SCREEN.blit(exit_text_3, (350, 380))
+    pygame.display.update() 
+
 def game_over_screen(imagen):
     SCREEN.blit(imagen, [0,0])
-    SCREEN.blit(tittle_game_over_text, (220, 100)) #botom.x botom.y
+    SCREEN.blit(tittle_game_over_text, (220, 100))
     pygame.draw.rect(SCREEN, (NEGRO), back_menu_button_1)
     pygame.draw.rect(SCREEN, (NEGRO), exit_button_1)
     SCREEN.blit(back_menu_text_1, (255, 320))
     SCREEN.blit(exit_text_1, (345, 400))
     pygame.display.update()
 
-def pantalla_win(imagen, score):
+def pantalla_win(imagen, score:int):
     score_text_2 = font.render(f"Score: {score}", True, BLANCO)
     SCREEN.blit(imagen, [0,0])
-    SCREEN.blit(tittle_victory_text, (160, 10)) #botom.x botom.y
+    SCREEN.blit(tittle_victory_text, (160, 10))
     pygame.draw.rect(SCREEN, (NEGRO), back_menu_button_2)
     pygame.draw.rect(SCREEN, (NEGRO), exit_button_2)
     SCREEN.blit(score_text_2, (260, 100))
@@ -78,30 +83,19 @@ def pantalla_win(imagen, score):
 def pantalla_jumpscare(imagen):
     SCREEN.blit(imagen, [0,0])
     pygame.display.update()
-
-def pantalla_pause():
-    pygame.draw.rect(SCREEN, (BLANCO), pause_botton)
-    pygame.draw.rect(SCREEN, (NEGRO), back_menu_button_3)
-    pygame.draw.rect(SCREEN, (NEGRO), exit_button_3)
-    SCREEN.blit(pause_text, (300, 150))
-    SCREEN.blit(back_menu_text_3, (250, 300))
-    SCREEN.blit(exit_text_3, (350, 380))
-    pygame.display.update() 
 #---------------------------------------------------------------------------------------------------------------------------
-#variables
 indice_imagen_actual = 0
 tiempo_linterna_uso = 0
 espera_linterna = 0
+flag_primer_linterna = True
 pause_star = 0
 pause_duration = 0
-#---------------------------------------------------------------------------------------------------------------------------
-#movimiento
+
 mover_arriba = False
 mover_abajo = False
 mover_derecha = False
 mover_izquierda = False
-#---------------------------------------------------------------------------------------------------------------------------
-#banderas
+
 is_running = True
 mostrar_title_screen = True
 mostrar_instructions_screen = False
@@ -119,74 +113,15 @@ mostrar_jumpscare_puppet = False
 
 flag_primeros_enemigos = True
 flag_niños = True
-flag_puerta = False
 linterna_on = False
-flag_play_music = True
 #---------------------------------------------------------------------------------------------------------------------------
 while is_running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
-        
-        if mostrar_game:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a:
-                    mover_izquierda = True
-                if event.key == pygame.K_d:
-                    mover_derecha = True
-                if event.key == pygame.K_w:
-                    mover_arriba = True
-                if event.key == pygame.K_s:
-                    mover_abajo = True
-                if event.key == pygame.K_ESCAPE:
-                    pause_start = pygame.time.get_ticks()
-                    mostrar_pause_screen = True
-                    mostrar_game = False
-            
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_a:
-                    mover_izquierda = False
-                if event.key == pygame.K_d:
-                    mover_derecha = False
-                if event.key == pygame.K_w:
-                    mover_arriba = False
-                if event.key == pygame.K_s:
-                    mover_abajo = False
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    create_bullet(jugador["shape"], event.pos)
-                    sonido_disparo.play()
-                if event.button == 3:
-                    if linterna_on == False:
-                        if pygame.time.get_ticks() - espera_linterna >= 10000:
-                                tiempo_linterna_uso = pygame.time.get_ticks()
-                                linterna_on = True
-                                sonido_linterna.play()
-                        else:
-                            sonido_no_linterna.play()
-                    else:
-                        sonido_no_linterna.play()
-        
-        elif mostrar_pause_screen:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if back_menu_button_3.collidepoint(event.pos):
-                    sonido_boton.play()
-                    mostrar_pause_screen = False
-                    mostrar_title_screen = True
-                if exit_button_3.collidepoint(event.pos):
-                    is_running = False
-            
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pause_end = pygame.time.get_ticks()
-                pause_duration = pause_end - pause_start
-                espera_linterna += pause_duration
-                mostrar_pause_screen = False
-                pygame.mixer.music.unpause()
-                mostrar_game = True
-        
-        elif mostrar_title_screen:
+    
+        if mostrar_title_screen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if play_button.collidepoint(event.pos):
                     sonido_boton.play()
@@ -245,6 +180,63 @@ while is_running:
                     mostrar_game = True
             elif event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(title_images)
+
+        elif mostrar_game:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    mover_izquierda = True
+                if event.key == pygame.K_d:
+                    mover_derecha = True
+                if event.key == pygame.K_w:
+                    mover_arriba = True
+                if event.key == pygame.K_s:
+                    mover_abajo = True
+                if event.key == pygame.K_ESCAPE:
+                    pause_start = pygame.time.get_ticks()
+                    mostrar_pause_screen = True
+                    mostrar_game = False
+            
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_a:
+                    mover_izquierda = False
+                if event.key == pygame.K_d:
+                    mover_derecha = False
+                if event.key == pygame.K_w:
+                    mover_arriba = False
+                if event.key == pygame.K_s:
+                    mover_abajo = False
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    create_bullet(jugador["shape"], event.pos)
+                    sonido_disparo.play()
+                if event.button == 3:
+                    if flag_primer_linterna or linterna_on == False:
+                        if pygame.time.get_ticks() - espera_linterna >= 10000:
+                                tiempo_linterna_uso = pygame.time.get_ticks()
+                                linterna_on = True
+                                sonido_linterna.play()
+                        else:
+                            sonido_no_linterna.play()
+                    else:
+                        sonido_no_linterna.play()
+        
+        elif mostrar_pause_screen:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if back_menu_button_3.collidepoint(event.pos):
+                    sonido_boton.play()
+                    mostrar_pause_screen = False
+                    mostrar_title_screen = True
+                if exit_button_3.collidepoint(event.pos):
+                    is_running = False
+            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pause_end = pygame.time.get_ticks()
+                pause_duration = pause_end - pause_start
+                espera_linterna += pause_duration
+                mostrar_pause_screen = False
+                pygame.mixer.music.unpause()
+                mostrar_game = True
         
         elif mostrar_game_over_screen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -315,18 +307,27 @@ while is_running:
                     mostrar_jumpscare_puppet = False
                     mostrar_game_over_screen = True
     #---------------------------------------------------------------------------------------------------------------------------
-    
-    if mostrar_game:
-        for i in range (CANT_ENEMIGOS):
-            enemigo = crear_enemigo(jugador)
-            enemigos.append(enemigo)
-        flag_primeros_enemigos = False
+    if mostrar_title_screen:
+        mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_primeros_enemigos, flag_niños = reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos)
+        title_screen(title_images[indice_imagen_actual])
+        pygame.mixer.music.play(-1)
 
-        #imagenes vida
+    elif mostrar_instructions_screen:
+        instructions_screen(instructions_images[indice_imagen_actual])
+
+    elif mostrar_difficulty_screen:
+        difficulty_screen(title_images[indice_imagen_actual])
+
+    elif mostrar_game:
+        if flag_primeros_enemigos:
+            for i in range (CANT_ENEMIGOS):
+                enemigo = crear_enemigo(jugador)
+                enemigos.append(enemigo)
+            flag_primeros_enemigos = False
+
         corazon_imagen = calcular_vidas(jugador["vidas"], lista_corazones)
 
-        #linterna
-        if linterna_on: #si la linterna está en uso
+        if linterna_on:
             linterna_imagen = lista_linterna[1]
             if pygame.time.get_ticks() - tiempo_linterna_uso >= 3000:
                 linterna_on = False
@@ -334,19 +335,15 @@ while is_running:
         else:
             linterna_imagen = lista_linterna[0]
 
-        #texto score
         score_text = font_data.render(f"Score: {jugador["score"]}", True, BLANCO)
                                       
-        #mover jugador
         mover_jugador(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, obstaculos_personajes)
 
-        #puntaje
         if jugador["score"] == score_needed:
             if flag_niños:
                 sonido_niños.play()
                 flag_niños = False
 
-        # verificar si se completó el nivel
         flag_puerta = pasar_puerta(jugador, exit_tile, score_needed)
         if flag_puerta:
             indice_imagen_actual = 0
@@ -354,7 +351,6 @@ while is_running:
             mostrar_victory_screen = True
             pygame.mixer.music.stop()
         
-        #quitar vida a enemigo
         for enemigo in enemigos:
             if enemigo["vidas"] == 0:
                 enemigos.remove(enemigo)
@@ -362,7 +358,6 @@ while is_running:
                 nuevo_enemigo = crear_enemigo(jugador)
                 enemigos.append(nuevo_enemigo)
 
-        #quitar vida a jugador
         if linterna_on == False:
             for enemigo in enemigos:
                 mover_enemigo(enemigo, jugador)
@@ -382,7 +377,6 @@ while is_running:
                         if enemigo["tipo"] == "puppet":
                             mostrar_jumpscare_puppet = True
         
-        #dibujar en pantalla
         SCREEN.fill(NEGRO)
         draw_map(SCREEN, map_tiles)
         draw_jugador(SCREEN, jugador)
@@ -398,17 +392,6 @@ while is_running:
         pause_star = pygame.time.get_ticks()
         pantalla_pause()
         pygame.mixer.music.pause()
-    
-    elif mostrar_title_screen:
-        mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_primeros_enemigos, flag_niños = reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos)
-        title_screen(title_images[indice_imagen_actual])
-        pygame.mixer.music.play(-1)
-
-    elif mostrar_instructions_screen:
-        instructions_screen(instructions_images[indice_imagen_actual])
-
-    elif mostrar_difficulty_screen:
-        difficulty_screen(title_images[indice_imagen_actual])
 
     elif mostrar_game_over_screen:
         game_over_screen(game_over_images[indice_imagen_actual])
@@ -442,4 +425,5 @@ while is_running:
         pantalla_jumpscare(jumpscare_puppet[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
+
 pygame.quit()

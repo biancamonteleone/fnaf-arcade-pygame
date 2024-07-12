@@ -2,10 +2,9 @@ import csv
 import pygame
 from settings import *
 
-#---------------------------------------------------------------------------------------------------------------------------
 obstacles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 67]
 bullet_obstacles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 61]
-#---------------------------------------------------------------------------------------------------------------------------
+
 def load_world_data(ruta_archivo:str) -> list:
     """
     Carga los datos del mundo desde un archivo CSV y los convierte en una lista de listas de enteros.
@@ -16,12 +15,10 @@ def load_world_data(ruta_archivo:str) -> list:
     Returns:
         list: Una lista de listas, donde cada sublista representa una fila del mapa y cada elemento en la sublista representa una celda en esa fila.
     """
-    # with open(get_path_actual(nombre_archivo), "r", encoding="utf-8") as archivo:
-    #      encabezado = archivo.readline().strip("\n").split(",")
     world_data = []
-    with open(ruta_archivo, newline="") as archivo: #carga el archivo
-        archivo_csv = csv.reader(archivo, delimiter=';') #lee el archivo
-        for linea in archivo_csv: #itera cada linea del archivo
+    with open(ruta_archivo, newline="") as archivo:
+        archivo_csv = csv.reader(archivo, delimiter=';') 
+        for linea in archivo_csv:
             fila = []
             for tile in linea:
                 fila.append(int(tile))
@@ -62,24 +59,22 @@ def process_data(data:list, tile_list:list) -> tuple:
     obstaculos_tiles_bullets = []
     exit_tile = []
 
-    #iteracion en filas
     for y in range(len(data)):
         fila = data[y]
-        # Iteración sobre columnas
         for x in range(len(fila)):
             tile = fila[x]
-            image = tile_list[tile] #obtiene la imagen del tile desde 'tile_list'
-            image_rect = image.get_rect() #obtiene el rectángulo que encierra la imagen del tile
-            image_x = x * TILE_SIZE #calcula las coordenadas del tile en el mapa
+            image = tile_list[tile]
+            image_rect = image.get_rect()
+            image_x = x * TILE_SIZE
             image_y = y * TILE_SIZE
-            image_rect.center = (image_x, image_y) #centra el rectángulo de la imagen en las coordenadas calculadas.
-            tile_data = [image, image_rect, image_x, image_y] #agrupa la imagen, su rectángulo y las coordenadas en una lista.
+            image_rect.center = (image_x, image_y)
+            tile_data = [image, image_rect, image_x, image_y]
             map_tiles.append(tile_data)
             if tile in obstacles:
                 obstaculos_tiles.append(tile_data)
             if tile in bullet_obstacles:
                 obstaculos_tiles_bullets.append(tile_data)
-            if tile == 77:
+            if tile == 78:
                 exit_tile = tile_data
 
     return map_tiles, obstaculos_tiles, obstaculos_tiles_bullets, exit_tile
@@ -93,5 +88,4 @@ def draw_map(surface, map_tiles:list):
         map_tiles (list): Lista de tiles, donde cada tile es una lista que contiene una imagen y un rectángulo.
     """
     for tile in map_tiles:
-        surface.blit(tile[0], tile[1]) #tile[0] = img, tile[1] = rect
-#---------------------------------------------------------------------------------------------------------------------------
+        surface.blit(tile[0], tile[1])

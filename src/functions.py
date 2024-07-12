@@ -1,6 +1,5 @@
 import pygame
-from data import *
-from settings import *
+
 
 def get_path_actual(nombre_archivo:str) -> str:
     """

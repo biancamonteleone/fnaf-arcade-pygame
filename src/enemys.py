@@ -36,7 +36,7 @@ def crear_enemigo(jugador:dict) -> dict:
         "velocidad": 1,
         "tipo": tipo,
         "vidas": 75,
-        "seguir": jugador, #Referencia al jugador para seguirlo
+        "seguir": jugador
     }
     return enemigo
 
@@ -55,19 +55,19 @@ def mover_enemigo(enemigo: dict, jugador) -> None:
     elif enemigo["shape"].y > jugador["shape"].y:
         delta_y -= enemigo["velocidad"]
 
-    # Intentar mover en el eje X
+
     enemigo["shape"].x += delta_x
     if enemigo_colision_obstaculos(enemigo["shape"], obstaculos_personajes):
-        enemigo["shape"].x -= delta_x  # Revertir movimiento si hay colisión
+        enemigo["shape"].x -= delta_x 
 
-    # Intentar mover en el eje Y
+
     enemigo["shape"].y += delta_y
     if enemigo_colision_obstaculos(enemigo["shape"], obstaculos_personajes):
-        enemigo["shape"].y -= delta_y  # Revertir movimiento si hay colisión
+        enemigo["shape"].y -= delta_y 
 
 def enemigo_colision_obstaculos(shape, obstaculos: list) -> bool:
     for obstaculo in obstaculos:
-        if shape.colliderect(obstaculo[1]):  # Acceder al rectángulo de la tupla
+        if shape.colliderect(obstaculo[1]):
             return True
     return False
 
