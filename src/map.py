@@ -1,23 +1,27 @@
+import csv
 import pygame
 from settings import *
 
 obstacles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 67]
 bullet_obstacles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 61]
-def load_world_data(ruta_archivo: str) -> list:
+
+def load_world_data(ruta_archivo:str) -> list:
     """
-    Carga los datos del mundo desde un archivo de texto y los convierte en una lista de listas de enteros.
+    Carga los datos del mundo desde un archivo CSV y los convierte en una lista de listas de enteros.
 
     Args:
-        ruta_archivo (str): La ruta al archivo de texto que contiene los datos del mundo.
+        ruta_archivo (str): La ruta al archivo CSV que contiene los datos del mundo.
 
     Returns:
         list: Una lista de listas, donde cada sublista representa una fila del mapa y cada elemento en la sublista representa una celda en esa fila.
     """
     world_data = []
-    with open(ruta_archivo, 'r') as archivo:
-        for linea in archivo:
-            fila = [int(tile) 
-            for tile in linea.split(';')]
+    with open(ruta_archivo, newline="") as archivo:
+        archivo_csv = csv.reader(archivo, delimiter=';') 
+        for linea in archivo_csv:
+            fila = []
+            for tile in linea:
+                fila.append(int(tile))
             world_data.append(fila)
     return world_data
 
