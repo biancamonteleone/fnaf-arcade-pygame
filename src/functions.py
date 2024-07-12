@@ -46,7 +46,23 @@ def escalar_img(image, scale:int):
     nueva_imagen = pygame.transform.scale(image, (w*scale, h*scale))
     return nueva_imagen
 
-def reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos):
+def reiniciar(mover_derecha:bool, mover_izquierda:bool, mover_arriba:bool, mover_abajo:bool, jugador:dict, enemigos:list) -> tuple:
+    """
+    Reinicia el estado del juego.
+
+    Args:
+    mover_derecha (bool): Estado de movimiento hacia la derecha del jugador.
+    mover_izquierda (bool): Estado de movimiento hacia la izquierda del jugador.
+    mover_arriba (bool): Estado de movimiento hacia arriba del jugador.
+    mover_abajo (bool): Estado de movimiento hacia abajo del jugador.
+    jugador (dict): Diccionario que contiene información sobre el jugador.
+    enemigos (list): Lista de enemigos.
+
+    Returns:
+    tuple: Una tupla que contiene los estados actualizados de movimiento del jugador,
+           del diccionario del jugador, la lista de enemigos vacía, 
+           y las banderas `flag_enemigos` y `flag_niños` establecidas en True.
+    """
     flag_enemigos = True
     flag_niños = True
     mover_derecha = False
@@ -60,30 +76,40 @@ def reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador
         enemigos.remove(enemigo)
     return mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_enemigos, flag_niños
 
-def calcular_vidas(cant_vidas, lista_corazones):
-        if cant_vidas > 450:
-            corazon_imagen = lista_corazones[0]
-        elif cant_vidas <= 450 and cant_vidas > 400:
-            corazon_imagen = lista_corazones[1]
-        elif cant_vidas <= 400 and cant_vidas > 350:
-            corazon_imagen = lista_corazones[2]
-        elif cant_vidas <= 350 and cant_vidas > 300:
-            corazon_imagen = lista_corazones[3]
-        elif cant_vidas <= 300 and cant_vidas > 250:
-            corazon_imagen = lista_corazones[4]
-        elif cant_vidas <= 250 and cant_vidas > 200:
-            corazon_imagen = lista_corazones[5]
-        elif cant_vidas <= 200 and cant_vidas > 150:
-            corazon_imagen = lista_corazones[6]
-        elif cant_vidas <= 150 and cant_vidas > 100:
-            corazon_imagen = lista_corazones[7]
-        elif cant_vidas <= 100 and cant_vidas > 50:
-            corazon_imagen = lista_corazones[8]
-        elif cant_vidas <= 50 and cant_vidas > 0:
-            corazon_imagen = lista_corazones[9]
-        elif cant_vidas == 0:
-            corazon_imagen = lista_corazones[10]
-        return corazon_imagen
+def calcular_vidas(cant_vidas:int, lista_corazones:list):
+    """
+    Calcula la imagen de corazón correspondiente según la cantidad de vidas del jugador.
+
+    Args:
+    cant_vidas (int): La cantidad de vidas del jugador.
+    lista_corazones (list): Lista de imágenes de corazones.
+
+    Returns:
+    pygame.Surface: La imagen de corazón correspondiente.
+    """
+    if cant_vidas > 450:
+        corazon_imagen = lista_corazones[0]
+    elif cant_vidas <= 450 and cant_vidas > 400:
+        corazon_imagen = lista_corazones[1]
+    elif cant_vidas <= 400 and cant_vidas > 350:
+        corazon_imagen = lista_corazones[2]
+    elif cant_vidas <= 350 and cant_vidas > 300:
+        corazon_imagen = lista_corazones[3]
+    elif cant_vidas <= 300 and cant_vidas > 250:
+        corazon_imagen = lista_corazones[4]
+    elif cant_vidas <= 250 and cant_vidas > 200:
+        corazon_imagen = lista_corazones[5]
+    elif cant_vidas <= 200 and cant_vidas > 150:
+        corazon_imagen = lista_corazones[6]
+    elif cant_vidas <= 150 and cant_vidas > 100:
+        corazon_imagen = lista_corazones[7]
+    elif cant_vidas <= 100 and cant_vidas > 50:
+        corazon_imagen = lista_corazones[8]
+    elif cant_vidas <= 50 and cant_vidas > 0:
+        corazon_imagen = lista_corazones[9]
+    elif cant_vidas == 0:
+        corazon_imagen = lista_corazones[10]
+    return corazon_imagen
 
 
     
