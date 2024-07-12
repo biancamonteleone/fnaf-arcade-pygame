@@ -87,7 +87,6 @@ def pantalla_jumpscare(imagen):
 indice_imagen_actual = 0
 tiempo_linterna_uso = 0
 espera_linterna = 0
-flag_primer_linterna = True
 pause_star = 0
 pause_duration = 0
 
@@ -211,7 +210,7 @@ while is_running:
                     create_bullet(jugador["shape"], event.pos)
                     sonido_disparo.play()
                 if event.button == 3:
-                    if flag_primer_linterna or linterna_on == False:
+                    if linterna_on == False:
                         if pygame.time.get_ticks() - espera_linterna >= 10000:
                                 tiempo_linterna_uso = pygame.time.get_ticks()
                                 linterna_on = True
