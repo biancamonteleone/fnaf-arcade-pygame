@@ -1,5 +1,4 @@
 import pygame
-from map import draw_map, map_tiles, obstaculos_personajes, obstaculos_balas, exit_tile
 from settings import *
 from player import *
 from enemys import *
@@ -7,25 +6,22 @@ from weapon import *
 from data import *
 from functions import *
 #---------------------------------------------------------------------------------------------------------------------------
+# Inicialización de Pygame y la pantalla
 pygame.init()
+SCREEN = pygame.display.set_mode(SCREEN_SIZE) #establecer tamaño de la pantalla
+pygame.display.set_caption("Escape from Freddy's") #nombrar al juego
+pygame.display.set_icon(icon) #mostrar icono
+clock = pygame.time.Clock() #reloj
 #---------------------------------------------------------------------------------------------------------------------------
 #personajes
-jugador = crear_jugador()
+jugador = crear_jugador(jugador_img)
 enemigos = []
 #---------------------------------------------------------------------------------------------------------------------------
 #eventos de usuario
 cambiar_imagen_evento = pygame.USEREVENT + 1
 pygame.time.set_timer(cambiar_imagen_evento, 100) #(tipo de evento, cada cuando se genera el evento)
 cambiar_imagen_jumpscare = pygame.USEREVENT + 2
-pygame.time.set_timer(cambiar_imagen_jumpscare, 50) #(tipo de evento, cada cuando se genera el evento)
-cambiar_imagen_foxy = pygame.USEREVENT + 3
-pygame.time.set_timer(cambiar_imagen_foxy, 35) #(tipo de evento, cada cuando se genera el evento)
-#---------------------------------------------------------------------------------------------------------------------------
-#pantalla
-SCREEN = pygame.display.set_mode(SCREEN_SIZE) #establecer tamaño de la pantalla
-pygame.display.set_caption("Escape from Freddy's") #nombrar al juego
-pygame.display.set_icon(icon) #mostrar icono
-clock = pygame.time.Clock() #reloj
+pygame.time.set_timer(cambiar_imagen_jumpscare, 35) #(tipo de evento, cada cuando se genera el evento)
 #---------------------------------------------------------------------------------------------------------------------------
 #pantallas
 def title_screen(imagen):
@@ -42,7 +38,7 @@ def title_screen(imagen):
     pygame.display.update()
 
 def instructions_screen(imagen):
-    SCREEN.fill(COLOR)
+    SCREEN.fill(COLOR_FONDO)
     SCREEN.blit(imagen, [0,0])
     pygame.display.update()
 
@@ -82,11 +78,22 @@ def pantalla_win(imagen, score):
 def pantalla_jumpscare(imagen):
     SCREEN.blit(imagen, [0,0])
     pygame.display.update()
+
+def pantalla_pause():
+    pygame.draw.rect(SCREEN, (BLANCO), pause_botton)
+    pygame.draw.rect(SCREEN, (NEGRO), back_menu_button_3)
+    pygame.draw.rect(SCREEN, (NEGRO), exit_button_3)
+    SCREEN.blit(pause_text, (300, 150))
+    SCREEN.blit(back_menu_text_3, (250, 300))
+    SCREEN.blit(exit_text_3, (350, 380))
+    pygame.display.update() 
 #---------------------------------------------------------------------------------------------------------------------------
 #variables
 indice_imagen_actual = 0
-tiempo_linterna = 0
+tiempo_linterna_uso = 0
 espera_linterna = 0
+pause_star = 0
+pause_duration = 0
 #---------------------------------------------------------------------------------------------------------------------------
 #movimiento
 mover_arriba = False
@@ -102,6 +109,7 @@ mostrar_difficulty_screen = False
 mostrar_game = False
 mostrar_game_over_screen = False
 mostrar_victory_screen = False
+mostrar_pause_screen = False
 
 mostrar_jumpscare_freddy = False
 mostrar_jumpscare_bonnie = False
@@ -112,16 +120,16 @@ mostrar_jumpscare_puppet = False
 flag_primeros_enemigos = True
 flag_niños = True
 flag_puerta = False
-flag_linterna = False
-flag_linterna_disponible = True
+linterna_on = False
+flag_play_music = True
 #---------------------------------------------------------------------------------------------------------------------------
 while is_running:
     clock.tick(FPS)
-
-    if mostrar_game: 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            is_running = False
+        
+        if mostrar_game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     mover_izquierda = True
@@ -131,6 +139,11 @@ while is_running:
                     mover_arriba = True
                 if event.key == pygame.K_s:
                     mover_abajo = True
+                if event.key == pygame.K_ESCAPE:
+                    pause_start = pygame.time.get_ticks()
+                    mostrar_pause_screen = True
+                    mostrar_game = False
+            
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     mover_izquierda = False
@@ -140,132 +153,44 @@ while is_running:
                     mover_arriba = False
                 if event.key == pygame.K_s:
                     mover_abajo = False
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                create_bullet(jugador, event.pos)
-                sonido_disparo.play()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                if pygame.time.get_ticks() - espera_linterna >= 10000:
-                    if flag_linterna_disponible:
-                        tiempo_linterna = pygame.time.get_ticks()
-                        flag_linterna = True
-                        sonido_linterna.play()
-                        flag_linterna_disponible = False
-                    elif flag_linterna_disponible == False:
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    create_bullet(jugador["shape"], event.pos)
+                    sonido_disparo.play()
+                if event.button == 3:
+                    if linterna_on == False:
+                        if pygame.time.get_ticks() - espera_linterna >= 10000:
+                                tiempo_linterna_uso = pygame.time.get_ticks()
+                                linterna_on = True
+                                sonido_linterna.play()
+                        else:
+                            sonido_no_linterna.play()
+                    else:
                         sonido_no_linterna.play()
-                else: 
-                    sonido_no_linterna.play() 
-        #---------------------------------------------------------------------------------------------------------------------------
-        if flag_primeros_enemigos:
-            for i in range (CANT_ENEMIGOS):
-                enemigo = crear_enemigo(jugador, obstaculos_personajes)
-                enemigos.append(enemigo)
-            flag_primeros_enemigos = False
-
-        #imagenes vida
-        if jugador["vidas"] > 450:
-            corazon_imagen = lista_corazones[0]
-        elif jugador["vidas"] <= 450 and jugador["vidas"] > 400:
-            corazon_imagen = lista_corazones[1]
-        elif jugador["vidas"] <= 400 and jugador["vidas"] > 350:
-            corazon_imagen = lista_corazones[2]
-        elif jugador["vidas"] <= 350 and jugador["vidas"] > 300:
-            corazon_imagen = lista_corazones[3]
-        elif jugador["vidas"] <= 300 and jugador["vidas"] > 250:
-            corazon_imagen = lista_corazones[4]
-        elif jugador["vidas"] <= 250 and jugador["vidas"] > 200:
-            corazon_imagen = lista_corazones[5]
-        elif jugador["vidas"] <= 200 and jugador["vidas"] > 150:
-            corazon_imagen = lista_corazones[6]
-        elif jugador["vidas"] <= 150 and jugador["vidas"] > 100:
-            corazon_imagen = lista_corazones[7]
-        elif jugador["vidas"] <= 100 and jugador["vidas"] > 50:
-            corazon_imagen = lista_corazones[8]
-        elif jugador["vidas"] <= 50 and jugador["vidas"] > 0:
-            corazon_imagen = lista_corazones[9]
-        elif jugador["vidas"] == 0:
-            corazon_imagen = lista_corazones[10]
-
-        #linterna
-        if flag_linterna: #si la linterna está en uso
-            if pygame.time.get_ticks() - tiempo_linterna >= 3000:
-                flag_linterna = False
-                espera_linterna = pygame.time.get_ticks()
-            linterna_imagen = lista_linterna[1]
-        else:
-            linterna_imagen = lista_linterna[0]
-            flag_linterna_disponible = True
-
-        #texto score
-        score_text = font_data.render(f"Score: {jugador["score"]}", True, BLANCO)
-                                      
-        #mover jugador
-        mover_jugador(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, obstaculos_personajes)
-
-        #puntaje
-        if jugador["score"] == score_needed:
-            if flag_niños:
-                sonido_niños.play()
-                flag_niños = False
-
-        # verificar si se completó el nivel
-        flag_puerta = pasar_puerta(jugador, exit_tile, score_needed)
-        if flag_puerta:
-            mostrar_game = False
-            mostrar_victory_screen = True
-            pygame.mixer.music.stop()
         
-        #quitar vida a enemigo
-        for enemigo in enemigos:
-            if enemigo["vidas"] == 0:
-                enemigos.remove(enemigo)
-                jugador["score"] += 100
-                nuevo_enemigo = crear_enemigo(jugador, obstaculos_personajes)
-                enemigos.append(nuevo_enemigo)
-
-        #quitar vida a jugador
-        if flag_linterna == False:
-            for enemigo in enemigos:
-                mover_enemigo(enemigo, jugador)
-                if jugador["shape"].colliderect(enemigo["shape"]):
-                    jugador["vidas"] -= 1
-                    if jugador["vidas"] == 0:
-                        indice_imagen_actual = 0
-                        mostrar_game = False
-                        if enemigo["tipo"] == "freddy":
-                            mostrar_jumpscare_freddy = True
-                        if enemigo["tipo"] == "bonnie":
-                            mostrar_jumpscare_bonnie = True
-                        if enemigo["tipo"] == "chica":
-                            mostrar_jumpscare_chica = True
-                        if enemigo["tipo"] == "foxy":
-                            mostrar_jumpscare_foxy = True
-                        if enemigo["tipo"] == "puppet":
-                            mostrar_jumpscare_puppet = True
+        elif mostrar_pause_screen:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if back_menu_button_3.collidepoint(event.pos):
+                    sonido_boton.play()
+                    mostrar_pause_screen = False
+                    mostrar_title_screen = True
+                if exit_button_3.collidepoint(event.pos):
+                    is_running = False
+            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pause_end = pygame.time.get_ticks()
+                pause_duration = pause_end - pause_start
+                espera_linterna += pause_duration
+                mostrar_pause_screen = False
+                pygame.mixer.music.unpause()
+                mostrar_game = True
         
-        #dibujar en pantalla
-        SCREEN.fill(NEGRO)
-        draw_map(SCREEN, map_tiles)
-        draw_jugador(SCREEN, jugador)
-        update_bullets(obstaculos_balas, enemigos)
-        draw_bullets(SCREEN)
-        draw_enemigos(SCREEN, enemigos)
-        SCREEN.blit(corazon_imagen, (10, 10))
-        SCREEN.blit(linterna_imagen, (150, -5))
-        SCREEN.blit(score_text, (500, 10))
-        pygame.display.update()
-    #---------------------------------------------------------------------------------------------------------------------------
-    elif mostrar_title_screen:
-        mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_primeros_enemigos, flag_niños = reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos)
-        pygame.mixer.music.play(-1)
-        title_screen(title_images[indice_imagen_actual])
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
+        elif mostrar_title_screen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if play_button.collidepoint(event.pos):
                     sonido_boton.play()
-                    mostrar_title_screen = False 
-                    indice_imagen_actual = 0
+                    mostrar_title_screen = False
                     mostrar_difficulty_screen = True
                 if instructions_button.collidepoint(event.pos):
                     sonido_boton.play()
@@ -276,41 +201,26 @@ while is_running:
                     is_running = False
             if event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(title_images)
-    #---------------------------------------------------------------------------------------------------------------------------
-    elif mostrar_instructions_screen:
-        instructions_screen(instructions_images[indice_imagen_actual])
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sonido_boton.play()
-                    mostrar_instructions_screen = False
-                    indice_imagen_actual = 0
-                    mostrar_title_screen = True
+        
+        elif mostrar_instructions_screen:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                sonido_boton.play()
+                mostrar_instructions_screen = False
+                mostrar_title_screen = True
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 3:
                     sonido_boton.play()
-                    indice_imagen_actual += 1
-                    if indice_imagen_actual >= len(instructions_images):
-                        indice_imagen_actual = 0
+                    indice_imagen_actual = (indice_imagen_actual + 1) % len(instructions_images)
                 if event.button == 1:
                     sonido_boton.play()
-                    indice_imagen_actual -= 1
-                    if indice_imagen_actual < 0:
-                        indice_imagen_actual = len(instructions_images) - 1
-    #---------------------------------------------------------------------------------------------------------------------------
-    elif mostrar_difficulty_screen:
-        difficulty_screen(title_images[indice_imagen_actual])
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sonido_boton.play()
-                    mostrar_difficulty_screen = False
-                    indice_imagen_actual = 0
-                    mostrar_title_screen = True
+                    indice_imagen_actual = (indice_imagen_actual - 1) % len(instructions_images)
+        
+        elif mostrar_difficulty_screen:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                sonido_boton.play()
+                mostrar_difficulty_screen = False
+                mostrar_title_screen = True
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if easy_button.collidepoint(event.pos):
                     sonido_boton.play()
@@ -333,116 +243,203 @@ while is_running:
                     mostrar_difficulty_screen = False
                     indice_imagen_actual = 0
                     mostrar_game = True
-            if event.type == cambiar_imagen_evento:
+            elif event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(title_images)
-    #---------------------------------------------------------------------------------------------------------------------------
-    elif mostrar_game_over_screen:
-        game_over_screen(game_over_images[indice_imagen_actual])
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
+        
+        elif mostrar_game_over_screen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if back_menu_button_1.collidepoint(event.pos):
                     sonido_boton.play()
                     mostrar_game_over_screen = False
-                    indice_imagen_actual = 0
+                    musica_win.stop()
                     mostrar_title_screen = True
                 if exit_button_1.collidepoint(event.pos):
                     is_running = False
             if event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(game_over_images)
-    #---------------------------------------------------------------------------------------------------------------------------
-    elif mostrar_victory_screen:
-        pantalla_win(victory_images[indice_imagen_actual], jugador["score"])
-        pygame.mixer.music.stop()
-        musica_win.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
+        
+        elif mostrar_victory_screen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if back_menu_button_2.collidepoint(event.pos):
                     sonido_boton.play()
-                    mostrar_victory_screen = False
-                    indice_imagen_actual = 0
                     musica_win.stop()
+                    mostrar_victory_screen = False
                     mostrar_title_screen = True
                 if exit_button_2.collidepoint(event.pos):
                     is_running = False
             if event.type == cambiar_imagen_evento:
                 indice_imagen_actual = (indice_imagen_actual + 1) % len(victory_images)
+        
+        elif mostrar_jumpscare_freddy:
+            if event.type == cambiar_imagen_jumpscare:
+                if indice_imagen_actual < 15:
+                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_freddy)
+                else:
+                    indice_imagen_actual = 0
+                    mostrar_jumpscare_freddy = False
+                    mostrar_game_over_screen = True
+
+        elif mostrar_jumpscare_bonnie:
+            if event.type == cambiar_imagen_jumpscare:
+                if indice_imagen_actual < 15:
+                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_bonnie)
+                else:
+                    indice_imagen_actual = 0
+                    mostrar_jumpscare_bonnie = False
+                    mostrar_game_over_screen = True
+
+        elif mostrar_jumpscare_chica:
+            if event.type == cambiar_imagen_jumpscare:
+                if indice_imagen_actual < 15:
+                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_chica)
+                else:
+                    indice_imagen_actual = 0
+                    mostrar_jumpscare_chica = False
+                    mostrar_game_over_screen = True
+
+        elif mostrar_jumpscare_foxy:
+            if event.type == cambiar_imagen_jumpscare:
+                if indice_imagen_actual < 13:
+                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_foxy)
+                else:
+                    indice_imagen_actual = 0
+                    mostrar_jumpscare_foxy = False
+                    mostrar_game_over_screen = True
+
+        elif mostrar_jumpscare_puppet:
+            if event.type == cambiar_imagen_jumpscare:
+                if indice_imagen_actual < 15:
+                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_puppet)
+                else:
+                    indice_imagen_actual = 0
+                    mostrar_jumpscare_puppet = False
+                    mostrar_game_over_screen = True
     #---------------------------------------------------------------------------------------------------------------------------
+    
+    if mostrar_game:
+        for i in range (CANT_ENEMIGOS):
+            enemigo = crear_enemigo(jugador)
+            enemigos.append(enemigo)
+        flag_primeros_enemigos = False
+
+        #imagenes vida
+        corazon_imagen = calcular_vidas(jugador["vidas"], lista_corazones)
+
+        #linterna
+        if linterna_on: #si la linterna está en uso
+            linterna_imagen = lista_linterna[1]
+            if pygame.time.get_ticks() - tiempo_linterna_uso >= 3000:
+                linterna_on = False
+                espera_linterna = pygame.time.get_ticks()
+        else:
+            linterna_imagen = lista_linterna[0]
+
+        #texto score
+        score_text = font_data.render(f"Score: {jugador["score"]}", True, BLANCO)
+                                      
+        #mover jugador
+        mover_jugador(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, obstaculos_personajes)
+
+        #puntaje
+        if jugador["score"] == score_needed:
+            if flag_niños:
+                sonido_niños.play()
+                flag_niños = False
+
+        # verificar si se completó el nivel
+        flag_puerta = pasar_puerta(jugador, exit_tile, score_needed)
+        if flag_puerta:
+            indice_imagen_actual = 0
+            mostrar_game = False
+            mostrar_victory_screen = True
+            pygame.mixer.music.stop()
+        
+        #quitar vida a enemigo
+        for enemigo in enemigos:
+            if enemigo["vidas"] == 0:
+                enemigos.remove(enemigo)
+                jugador["score"] += 100
+                nuevo_enemigo = crear_enemigo(jugador)
+                enemigos.append(nuevo_enemigo)
+
+        #quitar vida a jugador
+        if linterna_on == False:
+            for enemigo in enemigos:
+                mover_enemigo(enemigo, jugador)
+                if jugador["shape"].colliderect(enemigo["shape"]):
+                    jugador["vidas"] -= 1
+                    if jugador["vidas"] == 0:
+                        indice_imagen_actual = 0
+                        mostrar_game = False
+                        if enemigo["tipo"] == "freddy":
+                            mostrar_jumpscare_freddy = True
+                        if enemigo["tipo"] == "bonnie":
+                            mostrar_jumpscare_bonnie = True
+                        if enemigo["tipo"] == "chica":
+                            mostrar_jumpscare_chica = True
+                        if enemigo["tipo"] == "foxy":
+                            mostrar_jumpscare_foxy = True
+                        if enemigo["tipo"] == "puppet":
+                            mostrar_jumpscare_puppet = True
+        
+        #dibujar en pantalla
+        SCREEN.fill(NEGRO)
+        draw_map(SCREEN, map_tiles)
+        draw_jugador(SCREEN, jugador)
+        update_bullets(obstaculos_balas, enemigos, bullets)
+        draw_bullets(SCREEN, bullets)
+        draw_enemigos(SCREEN, enemigos)
+        SCREEN.blit(corazon_imagen, (10, 10))
+        SCREEN.blit(linterna_imagen, (150, -5))
+        SCREEN.blit(score_text, (500, 10))
+        pygame.display.update()
+
+    elif mostrar_pause_screen:
+        pause_star = pygame.time.get_ticks()
+        pantalla_pause()
+        pygame.mixer.music.pause()
+    
+    elif mostrar_title_screen:
+        mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_primeros_enemigos, flag_niños = reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos)
+        title_screen(title_images[indice_imagen_actual])
+        pygame.mixer.music.play(-1)
+
+    elif mostrar_instructions_screen:
+        instructions_screen(instructions_images[indice_imagen_actual])
+
+    elif mostrar_difficulty_screen:
+        difficulty_screen(title_images[indice_imagen_actual])
+
+    elif mostrar_game_over_screen:
+        game_over_screen(game_over_images[indice_imagen_actual])
+
+    elif mostrar_victory_screen:
+        pantalla_win(victory_images[indice_imagen_actual], jugador["score"])
+        pygame.mixer.music.stop()
+        musica_win.play()
+
     elif mostrar_jumpscare_freddy:
         pantalla_jumpscare(jumpscare_freddy[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == cambiar_imagen_foxy:
-                if indice_imagen_actual < 15:
-                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_freddy)
-                else:
-                    mostrar_jumpscare_freddy = False
-                    indice_imagen_actual = 0
-                    mostrar_game_over_screen = True
-    #---------------------------------------------------------------------------------------------------------------------------
+
     elif mostrar_jumpscare_bonnie:
         pantalla_jumpscare(jumpscare_bonnie[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == cambiar_imagen_foxy:
-                if indice_imagen_actual < 15:
-                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_bonnie)
-                else:
-                    mostrar_jumpscare_bonnie = False
-                    indice_imagen_actual = 0
-                    mostrar_game_over_screen = True
-    #---------------------------------------------------------------------------------------------------------------------------        
+     
     elif mostrar_jumpscare_chica:
         pantalla_jumpscare(jumpscare_chica[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == cambiar_imagen_foxy:
-                if indice_imagen_actual < 15:
-                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_chica)
-                else:
-                    mostrar_jumpscare_chica = False
-                    indice_imagen_actual = 0
-                    mostrar_game_over_screen = True
-    #---------------------------------------------------------------------------------------------------------------------------
+
     elif mostrar_jumpscare_foxy:
         pantalla_jumpscare(jumpscare_foxy[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == cambiar_imagen_foxy:
-                if indice_imagen_actual < 13:
-                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_foxy)
-                else:
-                    mostrar_jumpscare_foxy = False
-                    indice_imagen_actual = 0
-                    mostrar_game_over_screen = True
-    #---------------------------------------------------------------------------------------------------------------------------
+
     elif mostrar_jumpscare_puppet:
         pantalla_jumpscare(jumpscare_puppet[indice_imagen_actual])
         pygame.mixer.music.stop()
         sonido_jumpscare.play()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == cambiar_imagen_foxy:
-                if indice_imagen_actual < 15:
-                    indice_imagen_actual = indice_imagen_actual + 1 % len(jumpscare_foxy)
-                else:
-                    mostrar_jumpscare_puppet = False
-                    indice_imagen_actual = 0
-                    mostrar_game_over_screen = True
 pygame.quit()

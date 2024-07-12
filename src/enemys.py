@@ -2,9 +2,9 @@ import pygame
 from settings import *
 from random import randint
 from functions import escalar_img
-from data import freddy_img, bonnie_img, chica_img, foxy_img, puppet_img
+from data import freddy_img, bonnie_img, chica_img, foxy_img, puppet_img, obstaculos_personajes
 
-def crear_enemigo(jugador:dict, obstaculos:list) -> dict:
+def crear_enemigo(jugador:dict) -> dict:
     
     posiciones_enemigos = [(100,100), (380,70), (380,250), (30,275), (380,320), (700,250), (700,500), (70,500)]
     imagenes_enemigos = [freddy_img, bonnie_img, chica_img, foxy_img, puppet_img]
@@ -28,16 +28,15 @@ def crear_enemigo(jugador:dict, obstaculos:list) -> dict:
 
     x, y = cordenada_random
 
-    imagen_random = escalar_img(imagen_random, ESCALA_PERSONAJE)
+    imagen_random = escalar_img(imagen_random, ESCALA_PERSONAJES)
     enemigo = {
         "image": imagen_random,
-        "shape": pygame.Rect(x, y, WIDTH_PERSONAJE, HEIGHT_PERSONAJE),
+        "shape": pygame.Rect(x, y, imagen_random.get_width(), imagen_random.get_height()),
         "flip": False,
         "velocidad": 1,
-        "seguir": jugador, #Referencia al jugador para seguirlo
         "tipo": tipo,
-        "obstaculos": obstaculos,
         "vidas": 75,
+        "seguir": jugador, #Referencia al jugador para seguirlo
     }
     return enemigo
 
@@ -58,21 +57,15 @@ def mover_enemigo(enemigo: dict, jugador) -> None:
 
     # Intentar mover en el eje X
     enemigo["shape"].x += delta_x
-    if enemigo_colision_obstaculos(enemigo["shape"], enemigo["obstaculos"]):
+    if enemigo_colision_obstaculos(enemigo["shape"], obstaculos_personajes):
         enemigo["shape"].x -= delta_x  # Revertir movimiento si hay colisión
 
     # Intentar mover en el eje Y
     enemigo["shape"].y += delta_y
-    if enemigo_colision_obstaculos(enemigo["shape"], enemigo["obstaculos"]):
+    if enemigo_colision_obstaculos(enemigo["shape"], obstaculos_personajes):
         enemigo["shape"].y -= delta_y  # Revertir movimiento si hay colisión
 
 def enemigo_colision_obstaculos(shape, obstaculos: list) -> bool:
-    for obstaculo in obstaculos:
-        if shape.colliderect(obstaculo[1]):  # Acceder al rectángulo de la tupla
-            return True
-    return False
-
-def enemigo_colision_obstaculos(shape, obstaculos:list) -> bool:
     for obstaculo in obstaculos:
         if shape.colliderect(obstaculo[1]):  # Acceder al rectángulo de la tupla
             return True

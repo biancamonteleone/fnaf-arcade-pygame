@@ -1,13 +1,25 @@
 import pygame
 from settings import *
 from functions import cargar_archivo_json, escalar_img
+from map import *
 #---------------------------------------------------------------------------------------------------------------------------
 pygame.font.init()
 #---------------------------------------------------------------------------------------------------------------------------
 rutas = cargar_archivo_json("rutas.json")
 #---------------------------------------------------------------------------------------------------------------------------
+#mapa
+world_data = load_world_data("src/mapa.csv")
+tile_list = process_tiles()
+map_tiles, obstaculos_personajes, obstaculos_balas, exit_tile = process_data(world_data, tile_list)
+#---------------------------------------------------------------------------------------------------------------------------
 #imagenes
-icon = pygame.image.load(rutas[R_ICONO]["ruta icono"])
+icon = pygame.image.load(rutas[R_EXTRAS]["ruta icono"])
+bala_img = escalar_img(pygame.image.load(rutas[R_EXTRAS]["ruta bala"]), ESCALA_BALA)
+lista_linterna = []
+for i in range(2):
+    image = pygame.image.load(rutas[R_EXTRAS][f"ruta linterna {i}"])
+    image = escalar_img(image, 0.2)
+    lista_linterna.append(image)
 
 title_images = []
 for i in range(15):
@@ -60,33 +72,27 @@ for i in range(11):
     image = escalar_img(image, 0.2)
     lista_corazones.append(image)
 
-lista_linterna = []
-for i in range(2):
-    image = pygame.image.load(rutas[R_LINTERNA][f"ruta linterna {i}"])
-    image = escalar_img(image, 0.2)
-    lista_linterna.append(image)
-
-jugador_img = escalar_img(pygame.image.load(rutas[R_PERSONAJES]["ruta guardia"]), ESCALA_PERSONAJE)
+jugador_img = pygame.image.load(rutas[R_PERSONAJES]["ruta guardia"])
+jugador_img = escalar_img(jugador_img, ESCALA_PERSONAJES)
 freddy_img = pygame.image.load(rutas[R_PERSONAJES]["ruta freddy"])
 bonnie_img = pygame.image.load(rutas[R_PERSONAJES]["ruta bonnie"])
 chica_img = pygame.image.load(rutas[R_PERSONAJES]["ruta chica"])
 foxy_img = pygame.image.load(rutas[R_PERSONAJES]["ruta foxy"])
 puppet_img = pygame.image.load(rutas[R_PERSONAJES]["ruta puppet"])
-bala_img = escalar_img(pygame.image.load(rutas[R_BALA]["ruta bala"]), ESCALA_BALA)
 #---------------------------------------------------------------------------------------------------------------------------
 #musica/sonidos
 pygame.mixer.init()
-musica_win = pygame.mixer.Sound(rutas[R_MUSICA]["ruta musica win"])
-pygame.mixer.music.load(rutas[R_MUSICA]["ruta musica"])
+musica_win = pygame.mixer.Sound(rutas[R_AUDIO]["ruta musica win"])
+pygame.mixer.music.load(rutas[R_AUDIO]["ruta musica"])
 
-sonido_boton = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido boton"])
-sonido_disparo = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido disparo"])
-sonido_jumpscare = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido jumpscare"])
-sonido_niños = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido niños"])
-sonido_vida = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido vida"])
-sonido_estatica = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido estatica"])
-sonido_linterna = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido linterna"])
-sonido_no_linterna = pygame.mixer.Sound(rutas[R_SONIDO]["ruta sonido no linterna"])
+sonido_boton = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido boton"])
+sonido_disparo = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido disparo"])
+sonido_jumpscare = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido jumpscare"])
+sonido_niños = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido niños"])
+sonido_vida = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido vida"])
+sonido_estatica = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido estatica"])
+sonido_linterna = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido linterna"])
+sonido_no_linterna = pygame.mixer.Sound(rutas[R_AUDIO]["ruta sonido no linterna"])
 #---------------------------------------------------------------------------------------------------------------------------
 #fuente
 font = pygame.font.Font(rutas[R_FUENTE]["ruta fuente"], 40)
@@ -120,6 +126,11 @@ exit_text_1 = font.render("Exit", True, BLANCO)
 tittle_victory_text = font_tittle.render("¡You Escaped!", True, BLANCO)
 back_menu_text_2 = font.render("Back to menu", True, BLANCO)
 exit_text_2 = font.render("Exit", True, BLANCO)
+
+#pause
+pause_text = font_tittle.render("PAUSE", True, NEGRO)
+back_menu_text_3 = font.render("Back to menu", True, BLANCO)
+exit_text_3 = font.render("Exit", True, BLANCO)
 #---------------------------------------------------------------------------------------------------------------------------
 #botones
 
@@ -140,3 +151,10 @@ exit_button_1 = pygame.Rect(345, 400, 90, 50)
 #win
 back_menu_button_2 = pygame.Rect(250, 200, 300, 50)
 exit_button_2 = pygame.Rect(350, 270, 90, 50)
+
+#pause
+pause_botton = pygame.Rect(290, 150, 235, 80)
+back_menu_button_3 = pygame.Rect(250, 300, 300, 50)
+exit_button_3 = pygame.Rect(350, 380, 90, 50)
+
+

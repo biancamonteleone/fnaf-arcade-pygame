@@ -1,5 +1,4 @@
 import pygame
-from settings import WIDTH_PERSONAJE, HEIGHT_PERSONAJE
 from data import *
 from settings import *
 
@@ -55,12 +54,37 @@ def reiniciar(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador
     mover_izquierda = False
     mover_arriba = False
     mover_abajo = False
-    jugador["shape"] = pygame.Rect(380, 450, WIDTH_PERSONAJE, HEIGHT_PERSONAJE)
+    jugador["shape"] = pygame.Rect(380, 450, jugador["image"].get_width(), jugador["image"].get_height())
     jugador["vidas"] = 500
     jugador["score"] = 0
     for enemigo in enemigos:
         enemigos.remove(enemigo)
     return mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jugador, enemigos, flag_enemigos, flag_niños
+
+def calcular_vidas(cant_vidas, lista_corazones):
+        if cant_vidas > 450:
+            corazon_imagen = lista_corazones[0]
+        elif cant_vidas <= 450 and cant_vidas > 400:
+            corazon_imagen = lista_corazones[1]
+        elif cant_vidas <= 400 and cant_vidas > 350:
+            corazon_imagen = lista_corazones[2]
+        elif cant_vidas <= 350 and cant_vidas > 300:
+            corazon_imagen = lista_corazones[3]
+        elif cant_vidas <= 300 and cant_vidas > 250:
+            corazon_imagen = lista_corazones[4]
+        elif cant_vidas <= 250 and cant_vidas > 200:
+            corazon_imagen = lista_corazones[5]
+        elif cant_vidas <= 200 and cant_vidas > 150:
+            corazon_imagen = lista_corazones[6]
+        elif cant_vidas <= 150 and cant_vidas > 100:
+            corazon_imagen = lista_corazones[7]
+        elif cant_vidas <= 100 and cant_vidas > 50:
+            corazon_imagen = lista_corazones[8]
+        elif cant_vidas <= 50 and cant_vidas > 0:
+            corazon_imagen = lista_corazones[9]
+        elif cant_vidas == 0:
+            corazon_imagen = lista_corazones[10]
+        return corazon_imagen
 
 
     

@@ -1,12 +1,14 @@
 import pygame
 from settings import *
 from data import jugador_img
+from functions import escalar_img
 
-def crear_jugador():
+def crear_jugador(jugador_img):
     jugador = {
     "image": jugador_img,
-    "shape": pygame.Rect(380, 450, WIDTH_PERSONAJE, HEIGHT_PERSONAJE),
+    "shape": pygame.Rect(380, 450, jugador_img.get_width(), jugador_img.get_height()),
     "flip": False,
+    "velocidad": 2,
     "tipo": "player",
     "vidas": 500,
     "score": 0
@@ -23,13 +25,13 @@ def mover_jugador(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jug
     delta_x = 0
     delta_y = 0
     if mover_izquierda:
-        delta_x -= SPEED
+        delta_x -= jugador["velocidad"]
     if mover_derecha:
-        delta_x += SPEED
+        delta_x += jugador["velocidad"]
     if mover_arriba:
-        delta_y -= SPEED
+        delta_y -= jugador["velocidad"]
     if mover_abajo:
-        delta_y += SPEED
+        delta_y += jugador["velocidad"]
 
     if delta_x < 0:
         jugador["flip"] = True
@@ -56,7 +58,7 @@ def mover_jugador(mover_derecha, mover_izquierda, mover_arriba, mover_abajo, jug
 
 def pasar_puerta(jugador, exit_tile, score_needed):
     if jugador["score"] >= score_needed:
-        if jugador["tipo"] == "player" and exit_tile[1].colliderect(jugador["shape"]):
+        if exit_tile[1].colliderect(jugador["shape"]):
             return True
     else:
         return False

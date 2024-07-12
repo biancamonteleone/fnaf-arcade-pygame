@@ -1,5 +1,8 @@
 [
-    {"ruta icono": "src/assets/images/icon/icono.png"
+    {"ruta icono": "src/assets/images/extras/icono.png",
+    "ruta bala": "src/assets/images/extras/bala.png",
+    "ruta linterna 0": "src/assets/images/extras/linterna(0).png",
+    "ruta linterna 1": "src/assets/images/extras/linterna(1).png"
     },
     {"ruta inicio 0": "src/assets/images/title_screen/(0).png",
     "ruta inicio 1": "src/assets/images/title_screen/(1).png",
@@ -134,12 +137,9 @@
     "ruta foxy": "src/assets/images/characters/foxy.png",
     "ruta puppet": "src/assets/images/characters/puppet.png"
     },
-    {"ruta bala": "src/assets/images/bullet/bala.png"
-    },
     {"ruta musica": "src/assets/sounds/menu_music.mp3",
-    "ruta musica win": "src/assets/sounds/victory_music.mp3"
-    },
-    {"ruta sonido boton": "src/assets/sounds/button_sound.mp3",
+    "ruta musica win": "src/assets/sounds/victory_music.mp3",
+    "ruta sonido boton": "src/assets/sounds/button_sound.mp3",
     "ruta sonido disparo": "src/assets/sounds/sonido_disparo.mp3",
     "ruta sonido jumpscare": "src/assets/sounds/sonido_jumpscare.mp3",
     "ruta sonido vida": "src/assets/sounds/sonido_vida.mp3",
@@ -163,8 +163,5 @@
     "ruta corazones 10": "src/assets/images/heart/(10).png",
     "ruta corazones 11": "src/assets/images/heart/(11).png",
     "ruta corazones 12": "src/assets/images/heart/(12).png"
-    },
-    {"ruta linterna 0": "src/assets/images/linterna/(0).png",
-    "ruta linterna 1": "src/assets/images/linterna/(1).png"
     }
 ]
